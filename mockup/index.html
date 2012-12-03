@@ -1,0 +1,218 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Periodic Table</title>
+    <meta name="description" content="Mockup for Periodic Table">
+    <meta name="author" content="rmhdev">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no">
+    <meta http-equiv="cleartype" content="on">
+
+    <!-- Lungo - Stylesheets -->
+    <link rel="stylesheet" href="components/lungo/lungo.css">
+    <link rel="stylesheet" href="components/lungo/lungo.icon.css">
+    <link rel="stylesheet" href="components/lungo/lungo.icon.brand.css">
+    <link rel="stylesheet" href="components/lungo/lungo.theme.default.css">
+</head>
+
+<body class="app">
+
+
+<section id="main" data-transition="slide">
+    <header class="">
+        <div class="centered title with-subtitle">
+            Periodic Table
+            <small class="subtitle">Lorem ipsum dolor sit amet</small>
+        </div>
+    </header>
+
+    <article id="main-article" class="list scroll">
+        <img src="components/logo.jpg" width="400" height="200" alt="logo"/>
+        <ul>
+            <li data-icon="search">
+                <a href="#search" data-router="section">
+                    <strong>Search</strong>
+                    <small>A description</small>
+                </a>
+            </li>
+            <li data-icon="tag">
+                <a href="#categories" data-router="section">
+                    <strong>Categories</strong>
+                    <small>A description</small>
+                </a>
+            </li>
+            <li data-icon="star">
+                <a href="#favorites" data-router="section">
+                    <div class="right bubble blue">7</div>
+                    <strong>Favorites</strong>
+                    <small>A description</small>
+                </a>
+            </li>
+            <li data-icon="info">
+                <a href="#about" data-router="section">
+                    <strong>About</strong>
+                    <small>A description</small>
+                </a>
+            </li>
+        </ul>
+    </article>
+</section>
+
+
+<section id="search" data-transition="slide">
+    <header data-title="Search">
+        <nav class="box">
+            <a href="#back" data-router="section" data-icon="left"></a>
+        </nav>
+    </header>
+    <article class="list scroll">
+        <form action="#" method="get">
+            <fieldset>
+                <!--<legend>Search</legend>-->
+
+                <label>Element or group</label>
+                <input type="search" placeholder="type your search" />
+                <a href="#" class="button theme" data-icon="search"></a>
+            </fieldset>
+        </form>
+    </article>
+</section>
+
+<section id="about" data-transition="slide">
+    <header data-title="About">
+        <nav class="box">
+            <a href="#back" data-router="section" data-icon="left"></a>
+        </nav>
+    </header>
+    <article class="list scroll">
+        About
+    </article>
+</section>
+
+
+<section id="categories" data-transition="slide">
+    <header data-title="List of categories">
+        <nav class="box">
+            <a href="#back" data-router="section" data-icon="left"></a>
+        </nav>
+    </header>
+    <article class="list scroll">
+        <ul>
+            <li>
+                <a href="#category-non-metals" data-router="section">
+                    <div class="right bubble blue">7</div>
+                    <strong>Non metals</strong>
+                </a>
+            </li>
+            <li>
+                <a href="#category-alkali-metals" data-router="section">
+                    <strong>Alkali metals</strong>
+                </a>
+            </li>
+            <li>
+                <a href="#category-alkaline-earth-metals" data-router="section">
+                    <strong>Alkaline earth metals</strong>
+                </a>
+            </li>
+        </ul>
+    </article>
+</section>
+
+
+<section id="category-non-metals" data-transition="slide">
+    <header data-title="Non metals category">
+        <nav class="box">
+            <a href="#back" data-router="section" data-icon="left"></a>
+        </nav>
+        <nav class="left box">
+            <a href="#aside-categories" data-router="aside" data-icon="menu"></a>
+        </nav>
+    </header>
+    <article class="list scroll">
+        <ul>
+            <li class="feature light blue">
+                <strong>Non metals</strong>
+                <p>Each new line of code in Lungo is welcome, we hope that Developers and restless minds help us to improve day by day this humble project.</p>
+            </li>
+
+            <li class="selectable arrow thumb" data-icon="user">
+                <a href="#show-category-elements" data-router="section">
+                    <strong>Hydrogen</strong>
+                    <small>with element</small>
+                </a>
+            </li>
+        </ul>
+    </article>
+</section>
+
+
+<section id="show-category-elements" data-transition="cover">
+    <header class="">
+        <nav class="left box">
+            <a href="#back" data-router="section" data-icon="close"></a>
+        </nav>
+
+        <div class="centered title with-subtitle">
+            Non metals elements
+            <small class="subtitle">Element #<span>1</span></small>
+        </div>
+
+        <nav class="right box">
+            <a href="#" data-action="carousel" data-direction="left" data-icon="left"></a>
+            <a href="#" data-action="carousel" data-direction="right" data-icon="right"></a>
+        </nav>
+    </header>
+
+    <article id="carousel-article">
+        <div data-control="carousel" class="carousel">
+            <div>
+                <div align="center">
+                    <img src="http://lorempixel.com/320/418/food/">
+                </div>
+            </div>
+        </div>
+    </article>
+</section>
+
+
+<aside id="aside-categories">
+    <header data-title="Categories"></header>
+    <article class="list">
+        <ul>
+            <li class="current">
+                <a href="#category-non-metals" data-router="article" data-count="7">
+                    <strong>Non metals</strong>
+                </a>
+            </li>
+            <li>
+                <a href="#category-non-metals" data-router="article" data-count="3">
+                    <strong>Alkali metals</strong>
+                </a>
+            </li>
+            <li>
+                <a href="#category-non-metals" data-router="article" data-count="12">
+                    <strong>Alkaline earth metals</strong>
+                </a>
+            </li>
+        </ul>
+    </article>
+</aside>
+
+
+
+
+<!-- Lungo - Dependencies -->
+<script src="components/quojs/quo.js"></script>
+<script src="components/lungo/lungo.js"></script>
+<!-- Lungo - Sandbox App -->
+<script>
+    Lungo.init({
+        name: 'Periodic Table'
+    });
+</script>
+</body>
+</html>
