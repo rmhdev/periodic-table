@@ -14,5 +14,5 @@ results
 npm-debug.log
 
 .idea/
-mockup/components
-api/node_modules
+mockup/components/
+api/node_modules/
