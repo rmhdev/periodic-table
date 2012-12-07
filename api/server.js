@@ -1,7 +1,16 @@
-var http = require('http');
-http.createServer(function (req, res) {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end("Hello World\n");
-}).listen(3000, '127.0.0.1');
-console.log("Server running at http://127.0.0.1:3000/");
+var express = require("express")
+    chemicalElements = require("./routes/chemicalElements.js");
 
+var app = express();
+
+app.get("/", function(request, response) {
+    response.send("Periodic table API");
+});
+
+app.get("/elements", function(request, response) {
+    response.send(chemicalElements.findAll(request, response));
+});
+
+var portNumber = 3000;
+app.listen(portNumber);
+console.log("Periodic table server: listening on port " + portNumber);
