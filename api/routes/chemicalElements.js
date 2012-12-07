@@ -1,5 +1,14 @@
 exports.findAll = function (request, response) {
-    var chemicalElements = {
+    response.send(findChemicalElements());
+};
+
+exports.findBySlug = function (request, response) {
+    var slug = request.params.slug;
+    response.send(findChemicalElementBySlug(slug));
+};
+
+function findChemicalElements() {
+    return {
         "elements": [
             {
                 "name": "Hydrogen",
@@ -18,5 +27,15 @@ exports.findAll = function (request, response) {
             }
         ]
     };
-    response.send(chemicalElements);
-};
+}
+
+function findChemicalElementBySlug(slug) {
+    return {
+        "element":
+        {
+            "name": "Hydrogen",
+            "symbol": "H",
+            "slug": "h"
+        }
+    };
+}
