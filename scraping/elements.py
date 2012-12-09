@@ -4,15 +4,14 @@
 import requests
 from bs4 import BeautifulSoup
 import re
-import csv, codecs, cStringIO
+import json
 
 class ChemicalElementsScrapper:
 
     def __init__(self, logger):
         self.logger = logger
-        self.elements = []
-        self.categories = []
-        #self.uri = "http://en.wikipedia.org/wiki/List_of_elements_by_symbol"
+        self.elements_parser = None
+        #self.uri = "http://en.wikipedia.org/wiki/List_of_elements"
         self.uri = "http://192.168.1.102/~rober/wikipedia/List_of_elements.html"
         self.http_headers = {
             'User-Agent' : 'Mozilla/5.0 (Windows; U; Windows NT 5.1; es-ES)'
@@ -33,16 +32,18 @@ class ChemicalElementsScrapper:
 
     def __process_request(self, request):
         soup = BeautifulSoup(request.text)
-        elements_parser = ChemicalElementsParser(soup, self.logger);
-        elements_parser.parse()
-        self.elements = elements_parser.get_elements()
+        self.elements_parser = ChemicalElementsParser(soup, self.logger);
+        self.elements_parser.parse()
         self.save()
 
     def save(self):
-        # with open("prueba.csv", 'wb') as f:
-        #     writer = UnicodeWriter(f);
-        #     writer.writerows(self.elements)
-        #     f.close()
+        self.__save_json('data/elements.json', self.elements_parser.get_elements())
+        self.__save_json('data/categories.json', self.elements_parser.get_categories())
+
+    def __save_json(self, filename, data):
+        with open(filename, 'wb') as fp:
+            json.dump(data, fp, indent=2)
+            fp.close()
 
 
 class ChemicalElementsParser:
@@ -68,22 +69,21 @@ class ChemicalElementsParser:
             else: 
                 element = self.__get_data_from_table_row(tr)
                 self.elements.append(element)
-        self.logger.debug("Chemical elements found: %d" % len(self.elements))
+        self.logger.info("Chemical elements found: %d" % len(self.elements))
 
     def __get_data_from_table_row(self, tr):
         tds = tr.find_all("td", recursive=False)
-        atomic_number = tds[0].string
+        atomic_number = self.__process_int(tds[0].string)
         color = self.__get_category_color_from_td(tds[1])
         category = self.categories_parser.find_by_color(color)
-        self.logger.debug("[%3s] %s: %s", atomic_number, color, category)
         return {
             "atomic_number":            atomic_number,
             "symbol":                   tds[1].string,
             # "name":                     tds[2].find(text=True),
             "href":                     tds[2].a.get("href"),
             # "etymology":                tds[3].findAll(text=True),
-            "group":                    tds[4].string,
-            "period":                   tds[5].string,
+            "group":                    self.__process_int(                tds[4].string),
+            "period":                   self.__process_int(                tds[5].string),
             "atomic_weight":            self.__process_atomic_weight(      tds[6]  ),
             "density":                  self.__process_density(            tds[7]  ),
             "melting_point":            self.__process_temperature(        tds[8]  ),
@@ -101,6 +101,21 @@ class ChemicalElementsParser:
             category_color = m.group(1)
         return category_color
 
+    def __process_int(self, digit):
+        if digit is not None and self.__is_numeric(digit):
+            digit = int(digit)
+        return digit
+
+    def __process_float(self, digit):
+        if digit is not None and self.__is_numeric(digit):
+            digit = float(digit)
+        return digit
+
+    def __is_numeric(self, item):
+        if isinstance(item, str):
+            return item.isdigit()
+        return isinstance( item, ( int, long, float ))
+
     def __process_atomic_weight(self, td):
         weight = td.find("span", {"class": "sorttext"})
         if (weight):
@@ -116,6 +131,11 @@ class ChemicalElementsParser:
         cell_value = cell.find(text=True)
         if (self.__is_dash(cell_value)):
             cell_value = None
+        if cell_value is not None:
+            if not cell_value.isdigit():
+                digits = [float(s) for s in cell_value.split() if s.isdigit()]
+                if len(digits) > 0:
+                    cell_value = str(digits[0])
         return cell_value
 
     def __is_dash(self, text):
@@ -130,13 +150,17 @@ class ChemicalElementsParser:
     def get_elements(self):
         return self.elements
 
+    def get_categories(self):
+        return self.categories_parser.get_categories()
+
 
 
 class ElementCategoriesParser:
     def __init__(self, soup, logger):
         self.soup = soup
         self.logger = logger
-        self.categories = {}
+        self.categories = []
+        self.categories_by_color = {}
         self.table_attributes = { "cellpadding": "3" }
 
     def parse(self):
@@ -145,13 +169,24 @@ class ElementCategoriesParser:
 
     def __process_categories_table(self, table_categories):
         for td in table_categories.find_all("td"):
-            category_name = ("".join(td.find_all(text=True))).replace("\n", " ")
+            category_name = self.__get_category_name_from_td(td)
             if category_name is not None:
-                category_color = self.get_category_color_from_td(td)
+                category_color = self.__get_category_color_from_td(td)
                 if (self.__is_category_color_correct(category_color)):
-                    self.categories[category_color] = category_name
+                    self.categories_by_color[category_color] = category_name
+                    link = td.find("a")
+                    href = None
+                    if link is not None:
+                        href = link.get("href")
+                    self.categories.append({
+                        "name": category_name,
+                        "href": href,
+                    })
 
-    def get_category_color_from_td(self, td):
+    def __get_category_name_from_td(self, td):
+        return ("".join(td.find_all(text=True))).replace("\n", " ")
+
+    def __get_category_color_from_td(self, td):
         category_color = ""
         m = re.search("background:(.+?);", td["style"])
         if m:
@@ -165,37 +200,6 @@ class ElementCategoriesParser:
         return self.categories
 
     def find_by_color(self, color):
-        if color in self.categories:
-            return self.categories[color]
+        if color in self.categories_by_color:
+            return self.categories_by_color[color]
         return None
-
-
-
-class UnicodeWriter:
-    """
-    A CSV writer which will write rows to CSV file "f",
-    which is encoded in the given encoding.
-    """
-
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
-        # Redirect output to a queue
-        self.queue = cStringIO.StringIO()
-        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
-        self.stream = f
-        self.encoder = codecs.getincrementalencoder(encoding)()
-
-    def writerow(self, row):
-        self.writer.writerow([s.encode("utf-8") for s in row])
-        # Fetch UTF-8 output from the queue ...
-        data = self.queue.getvalue()
-        data = data.decode("utf-8")
-        # ... and reencode it into the target encoding
-        data = self.encoder.encode(data)
-        # write to the target stream
-        self.stream.write(data)
-        # empty queue
-        self.queue.truncate(0)
-
-    def writerows(self, rows):
-        for row in rows:
-            self.writerow(row)

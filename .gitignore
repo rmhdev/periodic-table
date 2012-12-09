@@ -12,7 +12,8 @@ logs
 results
 
 npm-debug.log
+.DS_Store
 
 .idea/
-mockup/components/
-api/node_modules/
+mockup/components
+api/node_modules

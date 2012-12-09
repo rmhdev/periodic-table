@@ -18,11 +18,3 @@ if __name__ == "__main__":
     logger.info("Scraping chemical elements list")
     scrapper = ChemicalElementsScrapper(logger)
     scrapper.start()
-
-    # req = requests.get(get_uri(), headers=get_http_headers())
-    # if req.status_code != 200:
-    #     print "error in request"
-    #     exit()
-    # elements = get_data_from_request(req)
-    # print "data processed"
-
