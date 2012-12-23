@@ -6,7 +6,12 @@
     "dependencies": {
         "express":      "3.x",
         "mocha":        "1.x",
-        "supertest":    "*"
+        "supertest":    "*",
+        "mongodb":      "1.2.x"
+    },
+    "engines": {
+        "node": "0.8.x",
+        "npm":  "1.1.x"
     },
     "scripts": {
         "test":         "make test"

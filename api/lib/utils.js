@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = {
     startServer: function(port) {
         var express             = require("express"),

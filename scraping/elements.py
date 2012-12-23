@@ -154,7 +154,6 @@ class ChemicalElementsParser:
         return self.categories_parser.get_categories()
 
 
-
 class ElementCategoriesParser:
     def __init__(self, soup, logger):
         self.soup = soup

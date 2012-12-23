@@ -1,0 +1,46 @@
+[
+  {
+    "href": "/wiki/Metalloid", 
+    "name": "Metalloids"
+  }, 
+  {
+    "href": null, 
+    "name": "Unknown chemical properties"
+  }, 
+  {
+    "href": "/wiki/Alkali_metal", 
+    "name": "Alkali metals"
+  }, 
+  {
+    "href": "/wiki/Alkaline_earth_metal", 
+    "name": "Alkaline earth metals"
+  }, 
+  {
+    "href": "/wiki/Transition_metal", 
+    "name": "Transition metals"
+  }, 
+  {
+    "href": "/wiki/Post-transition_metal", 
+    "name": "Post-transition metals"
+  }, 
+  {
+    "href": "/wiki/Nonmetal", 
+    "name": "Other nonmetals"
+  }, 
+  {
+    "href": "/wiki/Halogen", 
+    "name": "Halogens"
+  }, 
+  {
+    "href": "/wiki/Noble_gas", 
+    "name": "Noble gases"
+  }, 
+  {
+    "href": "/wiki/Lanthanide", 
+    "name": "Lanthanides"
+  }, 
+  {
+    "href": "/wiki/Actinide", 
+    "name": "Actinides"
+  }
+]
