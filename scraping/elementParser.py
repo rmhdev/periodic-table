@@ -3,7 +3,7 @@ def parseAtomicNumber(value):
     return int(value)
 
 def parseGroup(value):
-    if (value == "" or value == u'\xe2\x80\x93'):
+    if (__isUndefinedValue(value)):
         return None
     return int(value)
 
@@ -11,7 +11,7 @@ def parsePeriod(value):
     return int(value)
 
 def parseTemperatureKelvin(value):
-    if (value == "" or value == u'\xe2\x80\x93'):
+    if (__isUndefinedValue(value)):
         return None
     elements = value.split()
     if len(elements) > 1:
@@ -21,13 +21,23 @@ def parseTemperatureKelvin(value):
 def parseAtomicWeight(value):
     extra = None
     if value.find('[') == 0:
-        weight = value[value.find('[')+1:value.find(']')]
+        weight = __getValueBetween(value, '[', ']')
     else:
         weight = value[:value.find('(')]
-        extra = int(value[value.find('(')+1:value.find(')')])
+        extra = int(__getValueBetween(value, '(', ')'))
     return [float(weight), extra]
 
 def parseDensity(value):
-    if (value == "" or value == u'\xe2\x80\x93'):
+    if (__isUndefinedValue(value)):
         return None
     return float(value)
+
+def parseSymbol(value):
+    return "H"
+
+
+def __isUndefinedValue(value):
+    return (value == "" or value == u'\xe2\x80\x93')
+
+def __getValueBetween(value, itemFrom, itemTo):
+    return value[value.find(itemFrom)+1:value.find(itemTo)]
