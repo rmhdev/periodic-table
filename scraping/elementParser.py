@@ -33,11 +33,15 @@ def parseDensity(value):
     return float(value)
 
 def parseSymbol(value):
-    return "H"
+    return str(value).strip().capitalize()
 
+def parseElectronegativity(value):
+    if (__isUndefinedValue(value)):
+        return None
+    return float(value)
 
 def __isUndefinedValue(value):
-    return (value == "" or value == u'\xe2\x80\x93')
+    return (value == "" or value == u'\xe2\x80\x93' or value == None)
 
 def __getValueBetween(value, itemFrom, itemTo):
     return value[value.find(itemFrom)+1:value.find(itemTo)]

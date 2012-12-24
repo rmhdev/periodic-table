@@ -5,6 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import json
+import elementParser
 
 class ChemicalElementsScrapper:
 
@@ -12,7 +13,7 @@ class ChemicalElementsScrapper:
         self.logger = logger
         self.elements_parser = None
         #self.uri = "http://en.wikipedia.org/wiki/List_of_elements"
-        self.uri = "http://192.168.1.102/~rober/wikipedia/List_of_elements.html"
+        self.uri = "http://localhost/~rober/wikipedia/List_of_elements.html"
         self.http_headers = {
             'User-Agent' : 'Mozilla/5.0 (Windows; U; Windows NT 5.1; es-ES)'
         }
@@ -67,86 +68,13 @@ class ChemicalElementsParser:
             if (rowNumber == 0):
                 rowNumber = 1
             else: 
-                element = self.__get_data_from_table_row(tr)
+                chemicalElementParser = ChemicalElementParser(tr, self.logger)
+                color = chemicalElementParser.getCategoryColor()
+                category = self.categories_parser.find_by_color(color)
+                element = chemicalElementParser.getJson(category)
                 self.elements.append(element)
         self.logger.info("Chemical elements found: %d" % len(self.elements))
-
-    def __get_data_from_table_row(self, tr):
-        tds = tr.find_all("td", recursive=False)
-        atomic_number = self.__process_int(tds[0].string)
-        color = self.__get_category_color_from_td(tds[1])
-        category = self.categories_parser.find_by_color(color)
-        return {
-            "atomic_number":            atomic_number,
-            "symbol":                   tds[1].string,
-            # "name":                     tds[2].find(text=True),
-            "href":                     tds[2].a.get("href"),
-            # "etymology":                tds[3].findAll(text=True),
-            "group":                    self.__process_int(                tds[4].string),
-            "period":                   self.__process_int(                tds[5].string),
-            "atomic_weight":            self.__process_atomic_weight(      tds[6]  ),
-            "density":                  self.__process_density(            tds[7]  ),
-            "melting_point":            self.__process_temperature(        tds[8]  ),
-            "boiling_point":            self.__process_temperature(        tds[9]  ),
-            "specific_heat_capacity":   self.__process_temperature(        tds[10] ),
-            "electronegativity":        self.__process_electronegativity(  tds[11] ),
-            "category":                 category
-            # "abundance":                tds[12].string
-        }
-
-    def __get_category_color_from_td(self, td):
-        category_color = ""
-        m = re.search("background-color:(.+?)$", td["style"])
-        if m:
-            category_color = m.group(1)
-        return category_color
-
-    def __process_int(self, digit):
-        if digit is not None and self.__is_numeric(digit):
-            digit = int(digit)
-        return digit
-
-    def __process_float(self, digit):
-        if digit is not None and self.__is_numeric(digit):
-            digit = float(digit)
-        return digit
-
-    def __is_numeric(self, item):
-        if isinstance(item, str):
-            return item.isdigit()
-        return isinstance( item, ( int, long, float ))
-
-    def __process_atomic_weight(self, td):
-        weight = td.find("span", {"class": "sorttext"})
-        if (weight):
-            weight = weight.find(text=True)
-        if (weight == None):
-            weight = td.find(text=True)
-        return weight
-
-    def __process_density(self, td):
-        return self.__process_numeric_cell(td)
-
-    def __process_numeric_cell(self, cell):
-        cell_value = cell.find(text=True)
-        if (self.__is_dash(cell_value)):
-            cell_value = None
-        if cell_value is not None:
-            if not cell_value.isdigit():
-                digits = [float(s) for s in cell_value.split() if s.isdigit()]
-                if len(digits) > 0:
-                    cell_value = str(digits[0])
-        return cell_value
-
-    def __is_dash(self, text):
-        return (text == u'\xe2\x80\x93')
-
-    def __process_temperature(self, td):
-        return self.__process_numeric_cell(td)
-
-    def __process_electronegativity(self, td):
-        return self.__process_numeric_cell(td)
-
+    
     def get_elements(self):
         return self.elements
 
@@ -154,7 +82,58 @@ class ChemicalElementsParser:
         return self.categories_parser.get_categories()
 
 
+
+class ChemicalElementParser:
+
+    def __init__(self, tr, logger):
+        self.tr = tr
+        self.logger = logger        
+        self.tds = tr.find_all("td", recursive=False)
+
+    def getCategoryColor(self):
+        td = self.tds[1]
+        category_color = ""
+        m = re.search("background-color:(.+?)$", td["style"])
+        if m:
+            category_color = m.group(1)
+        return category_color
+
+    def getJson(self, category):
+        jsonElement = {
+            "atomic_number":            elementParser.parseAtomicNumber(      self.tds[0].find(text=True)),
+            "symbol":                   elementParser.parseSymbol(            self.tds[1].find(text=True)),
+            # "name":                   tds[2].find(text=True),
+            # "etymology":              tds[3].findAll(text=True),
+            "group":                    elementParser.parseGroup(             self.tds[4].find(text=True)),
+            "period":                   elementParser.parsePeriod(            self.tds[5].find(text=True)),
+            "atomic_weight":            elementParser.parseAtomicWeight(      self.__processAtomicWeight()),
+            "density":                  elementParser.parseDensity(           self.tds[7].find(text=True) ),
+            "melting_point":            elementParser.parseTemperatureKelvin( self.tds[8].find(text=True)  ),
+            "boiling_point":            elementParser.parseTemperatureKelvin( self.tds[9].find(text=True)  ),
+            "specific_heat_capacity":   elementParser.parseTemperatureKelvin( self.tds[10].find(text=True) ),
+            "electronegativity":        elementParser.parseElectronegativity( self.tds[11].find(text=True) ),
+            "category":                 category
+            # "abundance":              tds[12].string
+        }
+        jsonElement["href"] = self.tds[2].a.get("href")
+        return jsonElement
+
+    def __processAtomicWeight(self):
+        td = self.tds[6]
+        weight = td.find("span", {"class": "sorttext"})
+        if (weight):
+            weight = weight.find(text=True)
+        if (weight == None):
+            weight = td.find(text=True)
+        return weight
+
+
+
+
+
+
 class ElementCategoriesParser:
+
     def __init__(self, soup, logger):
         self.soup = soup
         self.logger = logger

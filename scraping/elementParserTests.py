@@ -14,6 +14,7 @@ class ElementParserTest(unittest.TestCase):
         self.assertEqual(3, elementParser.parseGroup("3 "))
         self.assertEqual(None, elementParser.parseGroup(""))
         self.assertEqual(None, elementParser.parseGroup(u'\xe2\x80\x93'))
+        self.assertEqual(None, elementParser.parseGroup(None))
 
     def testParsePeriod(self):
         self.assertEqual(1, elementParser.parsePeriod("1"))
@@ -27,6 +28,7 @@ class ElementParserTest(unittest.TestCase):
         self.assertEqual(None, elementParser.parseTemperatureKelvin(""))
         self.assertEqual(None, elementParser.parseTemperatureKelvin(u'\xe2\x80\x93'))
         self.assertEqual(3915, elementParser.parseTemperatureKelvin("3915 (Sublimates)"))
+        self.assertEqual(None, elementParser.parseTemperatureKelvin(None))
 
     def testParseAtomicWeight(self):
         self.assertEqual([1.008, 1], elementParser.parseAtomicWeight("1.008(1)"))
@@ -39,10 +41,20 @@ class ElementParserTest(unittest.TestCase):
         self.assertEqual(9.32, elementParser.parseDensity("9.32"))
         self.assertEqual(None, elementParser.parseDensity(""))
         self.assertEqual(None, elementParser.parseDensity(u'\xe2\x80\x93'))
+        self.assertEqual(None, elementParser.parseDensity(None))
 
     def testParseSymbol(self):
         self.assertEqual("H", elementParser.parseSymbol("h"))
-        #self.assertEqual("Al", elementParser.parseSymbol(" Al"))
+        self.assertEqual("H", elementParser.parseSymbol(" h"))
+        self.assertEqual("Al", elementParser.parseSymbol("al"))
+        self.assertEqual("Al", elementParser.parseSymbol(" al"))
+        self.assertEqual("Uup", elementParser.parseSymbol(" UUP"))
+
+    def testParseElectronegativity(self):
+        self.assertEqual(1, elementParser.parseElectronegativity("1"))
+        self.assertEqual(2.20, elementParser.parseElectronegativity("2.20"))
+        self.assertEqual(None, elementParser.parseElectronegativity(u'\xe2\x80\x93'))
+        self.assertEqual(None, elementParser.parseElectronegativity(None))
 
 
 if __name__ == "__main__":
