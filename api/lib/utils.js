@@ -13,11 +13,11 @@ module.exports = {
         });
 
         server.get("/elements", function(request, response) {
-            response.send(chemicalElements.findAll(request, response));
+            chemicalElements.findAll(request, response);
         });
 
-        server.get("/elements/:slug", function(request, response) {
-            response.send(chemicalElements.findBySlug(request, response));
+        server.get("/elements/:symbol", function(request, response) {
+            chemicalElements.findBySlug(request, response);
         });
 
         return server;

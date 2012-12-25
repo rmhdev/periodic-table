@@ -69,9 +69,9 @@ class ChemicalElementsParser:
                 rowNumber = 1
             else: 
                 chemicalElementParser = ChemicalElementParser(tr, self.logger)
-                color = chemicalElementParser.getCategoryColor()
+                color = chemicalElementParser.get_category_color()
                 category = self.categories_parser.find_by_color(color)
-                element = chemicalElementParser.getJson(category)
+                element = chemicalElementParser.get_json(category)
                 self.elements.append(element)
         self.logger.info("Chemical elements found: %d" % len(self.elements))
     
@@ -90,7 +90,7 @@ class ChemicalElementParser:
         self.logger = logger        
         self.tds = tr.find_all("td", recursive=False)
 
-    def getCategoryColor(self):
+    def get_category_color(self):
         td = self.tds[1]
         category_color = ""
         m = re.search("background-color:(.+?)$", td["style"])
@@ -98,7 +98,10 @@ class ChemicalElementParser:
             category_color = m.group(1)
         return category_color
 
-    def getJson(self, category):
+    def get_json(self, category):
+        atomic_weight = elementParser.parseAtomicWeight(self.__process_atomic_weight())
+        atomic_mass = atomic_weight[0]
+        atomic_mass_uncertainty = atomic_weight[1]
         jsonElement = {
             "atomic_number":            elementParser.parseAtomicNumber(      self.tds[0].find(text=True)),
             "symbol":                   elementParser.parseSymbol(            self.tds[1].find(text=True)),
@@ -106,19 +109,20 @@ class ChemicalElementParser:
             # "etymology":              tds[3].findAll(text=True),
             "group":                    elementParser.parseGroup(             self.tds[4].find(text=True)),
             "period":                   elementParser.parsePeriod(            self.tds[5].find(text=True)),
-            "atomic_weight":            elementParser.parseAtomicWeight(      self.__processAtomicWeight()),
-            "density":                  elementParser.parseDensity(           self.tds[7].find(text=True) ),
-            "melting_point":            elementParser.parseTemperatureKelvin( self.tds[8].find(text=True)  ),
-            "boiling_point":            elementParser.parseTemperatureKelvin( self.tds[9].find(text=True)  ),
-            "specific_heat_capacity":   elementParser.parseTemperatureKelvin( self.tds[10].find(text=True) ),
-            "electronegativity":        elementParser.parseElectronegativity( self.tds[11].find(text=True) ),
+            "density":                  elementParser.parseDensity(           self.tds[7].find(text=True)),
+            "melting_point":            elementParser.parseTemperatureKelvin( self.tds[8].find(text=True)),
+            "boiling_point":            elementParser.parseTemperatureKelvin( self.tds[9].find(text=True)),
+            "specific_heat_capacity":   elementParser.parseTemperatureKelvin( self.tds[10].find(text=True)),
+            "electronegativity":        elementParser.parseElectronegativity( self.tds[11].find(text=True)),
+            "atomic_mass":              atomic_mass,
+            "atomic_mass_uncertainty":  atomic_mass_uncertainty,
             "category":                 category
             # "abundance":              tds[12].string
         }
         jsonElement["href"] = self.tds[2].a.get("href")
         return jsonElement
 
-    def __processAtomicWeight(self):
+    def __process_atomic_weight(self):
         td = self.tds[6]
         weight = td.find("span", {"class": "sorttext"})
         if (weight):
