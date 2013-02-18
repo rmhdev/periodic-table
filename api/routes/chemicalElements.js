@@ -15,13 +15,13 @@ var mongodb = require('mongodb'),
     db = new mongodb.Db("elementsDb", server, {safe:true});
 
 db.open(function(err, db) {
-    if (!err) {
-        console.log("Opening connection to DB: OK");
+    if (err) {
+        console.log("Error opening connection to DB.");
     }
 });
 
 exports.findAll = function (request, response) {
-    var page = 1;//request.params.page
+    var page = request.params.page ? request.params.page : 1;
     var skip = limitPerPage * (page - 1);
     var queryOptions = {
         "limit": limitPerPage,
