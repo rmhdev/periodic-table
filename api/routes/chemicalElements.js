@@ -8,28 +8,28 @@ var limitPerPage = 5,
         "group": true,
         "period": true,
         "category": true
-    };
-
-var mongodb = require('mongodb'),
+    },
+    mongodb = require('mongodb'),
     server = new mongodb.Server("127.0.0.1", 27017, {}),
-    db = new mongodb.Db("elementsDb", server, {safe:true});
+    db = new mongodb.Db("elementsDb", server, {safe: true});
 
-db.open(function(err, db) {
+db.open(function (err, db) {
     if (err) {
         console.log("Error opening connection to DB.");
     }
 });
 
 exports.findAll = function (request, response) {
-    var page = request.params.page ? request.params.page : 1;
-    var skip = limitPerPage * (page - 1);
-    var queryOptions = {
+    var page, skip, queryOptions, collection;
+    page = request.params.page ? parseInt(request.params.page, 10) : 1;
+    skip = limitPerPage * (page - 1);
+    queryOptions = {
         "limit": limitPerPage,
         "skip": skip,
         "sort": "symbol"
     };
-    var collection = db.collection("elements");
-    collection.find({}, fields, queryOptions).toArray(function(err, elements) {
+    collection = db.collection("elements");
+    collection.find({}, fields, queryOptions).toArray(function (err, elements) {
         var apiData = {
             "page":     page,
             "perPage":  limitPerPage,
@@ -40,9 +40,10 @@ exports.findAll = function (request, response) {
 };
 
 exports.findBySlug = function (request, response) {
-    var symbol = request.params.symbol;
-    var collection = db.collection("elements");
-    collection.findOne({"symbol":symbol}, fields, function (err, element) {
+    var symbol, collection;
+    symbol = request.params.symbol;
+    collection = db.collection("elements");
+    collection.findOne({"symbol": symbol}, fields, function (err, element) {
         if (err) {
             console.log("error retrieving element by slug");
         }
