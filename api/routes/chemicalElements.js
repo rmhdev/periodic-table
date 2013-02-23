@@ -20,29 +20,40 @@ db.open(function (err, db) {
 });
 
 exports.findAll = function (request, response) {
-    var page, skip, queryOptions, collection;
-    page = request.params.page ? parseInt(request.params.page, 10) : 1;
-    skip = limitPerPage * (page - 1);
-    queryOptions = {
-        "limit": limitPerPage,
-        "skip": skip,
-        "sort": "symbol"
-    };
-    collection = db.collection("elements");
-    collection.find({}, fields, queryOptions).toArray(function (err, elements) {
-        var apiData = {
-            "page":     page,
-            "perPage":  limitPerPage,
-            "elements": elements
+    var page = request.params.page ? parseInt(request.params.page, 10) : 1,
+        skip = limitPerPage * (page - 1),
+        collection = db.collection("elements"),
+        queryOptions = {
+            "limit": limitPerPage,
+            "skip": skip,
+            "sort": "symbol"
         };
-        response.json(apiData);
+
+    collection.count(function (err, countTotal) {
+        var lastPage = Math.ceil(countTotal / limitPerPage);
+        if ((page < 1) || (page > lastPage)) {
+            response.json(404, {error: "Page doesn't exist"});
+        }
+        collection.find({}, fields, queryOptions).toArray(function (err, elements) {
+            var apiData = {
+                "page":     page,
+                "nextPage": (page < lastPage) ? page + 1 : 0,
+                "previousPage": page - 1,
+                "perPage":  limitPerPage,
+                "totalElements": countTotal,
+                "elements": elements
+            };
+            response.json(apiData);
+        });
     });
+
+
 };
 
 exports.findBySlug = function (request, response) {
-    var symbol, collection;
-    symbol = request.params.symbol;
-    collection = db.collection("elements");
+    var symbol = request.params.symbol,
+        collection = db.collection("elements");
+
     collection.findOne({"symbol": symbol}, fields, function (err, element) {
         if (err) {
             console.log("error retrieving element by slug");
