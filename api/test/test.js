@@ -181,7 +181,7 @@ describe('GET /element call', function () {
     it("GET /element/qwerty should return error", function (done) {
         request(app)
             .get("/element/qwerty")
-            .expect(200)
+            .expect(404)
             .end(function (err, res) {
                 done();
             });
