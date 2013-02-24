@@ -17,7 +17,7 @@ module.exports = {
         });
 
         server.get("/element/:symbol", function (request, response) {
-            chemicalElements.findBySlug(request, response);
+            chemicalElements.findBySymbol(request, response);
         });
 
         return server;

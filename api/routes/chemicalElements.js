@@ -28,6 +28,9 @@ exports.findAll = function (request, response) {
             "skip": skip,
             "sort": "symbol"
         };
+    if (isNaN(page)) {
+        response.json(404, {error: "Parameter must be an integer"});
+    }
 
     collection.count(function (err, countTotal) {
         var lastPage = Math.ceil(countTotal / limitPerPage);
@@ -50,16 +53,25 @@ exports.findAll = function (request, response) {
 
 };
 
-exports.findBySlug = function (request, response) {
-    var symbol = request.params.symbol,
+exports.findBySymbol = function (request, response) {
+    var symbol = request.params.symbol.toString(),
+        searchSymbol = "",
         collection = db.collection("elements");
 
-    collection.findOne({"symbol": symbol}, fields, function (err, element) {
-        if (err) {
-            console.log("error retrieving element by slug");
+    if (symbol.length < 1) {
+        response.json(404, {error: "You must specify a parameter"});
+    }
+    searchSymbol = symbol.charAt(0).toUpperCase() + symbol.slice(1).toLowerCase();
+
+    collection.findOne({"symbol": searchSymbol}, fields, function (err, document) {
+        //if (err) {
+        //    console.log("error retrieving element by slug");
+        //}
+        if (!document) {
+            response.json(404, {error: "Element doesn't exist"});
         }
         var apiData = {
-            "element": element
+            "element": document
         };
         response.json(apiData);
     });

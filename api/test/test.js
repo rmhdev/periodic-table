@@ -65,13 +65,15 @@ describe('GET /elements call', function (done) {
             .expect(200, function (err, res) {
                 var total = res.body.totalElements;
                 lastPage = Math.ceil(total / perPage);
+
+                request(app)
+                    .get("/elements/" + lastPage)
+                    .expect(200, function (err, res) {
+                        assert.equal(res.body.nextPage, 0);
+                        done();
+                    });
             });
-        request(app)
-            .get("/elements/" + lastPage)
-            .expect(200, function (err, res) {
-                assert.equal(res.body.nextPage, 0);
-                done();
-            });
+
     });
 
     it("GET /elements/1 should indicate there's no previous page", function (done) {
@@ -86,18 +88,21 @@ describe('GET /elements call', function (done) {
     it("GET /elements/1234 should return error", function (done) {
         request(app)
             .get("/elements/1234")
+            .expect('Content-Type', /json/)
             .expect(404, done);
     });
 
     it("GET /elements/0 should return error", function (done) {
         request(app)
             .get("/elements/0")
+            .expect('Content-Type', /json/)
             .expect(404, done);
     });
 
     it("GET /elements/qwerty should return error", function (done) {
         request(app)
             .get("/elements/qwerty")
+            .expect('Content-Type', /json/)
             .expect(404, done);
     });
 
@@ -106,12 +111,81 @@ describe('GET /elements call', function (done) {
 
 describe('GET /element call', function () {
 
-    it("GET /element/h should be succesfull", function (done) {
+    it("GET /element/h should be successful", function (done) {
         request(app)
             .get("/element/h")
-            .expect(200, done);
+            .expect(200)
+            .expect('Content-Type', /json/, done);
     });
 
+    it("GET /element/h should return Hydrogen information", function (done) {
+        request(app)
+            .get("/element/H")
+            .expect(200, function (err, res) {
+                assert.equal(res.body.element.symbol, "H");
+                done();
+            });
+    });
+
+    it("GET /element/H should return Hydrogen information", function (done) {
+        request(app)
+            .get("/element/H")
+            .expect(200, function (err, res) {
+                assert.equal(res.body.element.symbol, "H");
+                done();
+            });
+    });
+
+    it("GET /element/al should return Aluminium information", function (done) {
+        request(app)
+            .get("/element/al")
+            .expect(200, function (err, res) {
+                assert.equal(res.body.element.symbol, "Al");
+                done();
+            });
+    });
+
+    it("GET /element/AL should return Aluminium information", function (done) {
+        request(app)
+            .get("/element/AL")
+            .expect(200, function (err, res) {
+                assert.equal(res.body.element.symbol, "Al");
+                done();
+            });
+    });
+
+    it("GET /element/uut should return Ununtrium information", function (done) {
+        request(app)
+            .get("/element/uut")
+            .expect(200, function (err, res) {
+                assert.equal(res.body.element.symbol, "Uut");
+                done();
+            });
+    });
+
+    it("GET /element/UUT should return Ununtrium information", function (done) {
+        request(app)
+            .get("/element/UUT")
+            .expect(200, function (err, res) {
+                assert.equal(res.body.element.symbol, "Uut");
+                done();
+            });
+    });
+
+    it("GET /element (no parameter) should return error", function (done) {
+        request(app)
+            .get("/element")
+            .expect(404, done());
+    });
+
+    it("GET /element/qwerty should return error", function (done) {
+        request(app)
+            .get("/element/qwerty")
+            .expect(200)
+            .end(function (err, res) {
+                done();
+            });
+    });
 });
 
 // it('GET /elements/h should be successful', function(done) {
